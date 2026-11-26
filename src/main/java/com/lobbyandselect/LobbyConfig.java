@@ -20,6 +20,9 @@ public final class LobbyConfig {
     public static final ModConfigSpec.DoubleValue MAX_LATITUDE;
     public static final ModConfigSpec.BooleanValue RESPAWN_AT_CHOSEN_SPAWN;
     public static final ModConfigSpec.ConfigValue<List<? extends String>> PLACES;
+    public static final ModConfigSpec.ConfigValue<List<? extends String>> LOCKED_AREAS;
+    public static final ModConfigSpec.BooleanValue RESPECT_OPENPAC_CLAIMS;
+    public static final ModConfigSpec.BooleanValue OPS_IGNORE_LOCKS;
 
     public static final ModConfigSpec.IntValue SPLEEF_MIN_PLAYERS;
     public static final ModConfigSpec.BooleanValue TRIVIA_ENABLED;
@@ -56,6 +59,13 @@ public final class LobbyConfig {
                 .define("respawnAtChosenSpawn", true);
         PLACES = b.comment("Suggested places shown on the map, as 'Name;latitude;longitude'.")
                 .defineListAllowEmpty("places", LobbyConfig::defaultPlaces, () -> "Name;0;0", LobbyConfig::validPlace);
+        LOCKED_AREAS = b.comment("Areas nobody may pick as a spawn (e.g. countries that need a request first), as 'Name;minLat;minLon;maxLat;maxLon'.",
+                        "Players can still be sent there by an admin or by the request system your server uses.")
+                .defineListAllowEmpty("lockedAreas", List::of, () -> "Name;0;0;1;1", LobbyConfig::validArea);
+        RESPECT_OPENPAC_CLAIMS = b.comment("If Open Parties and Claims is installed, a spot inside a chunk claimed by another player/party is locked.")
+                .define("respectOpenPacClaims", true);
+        OPS_IGNORE_LOCKS = b.comment("Operators (permission level 2+) may pick locked spawns.")
+                .define("opsIgnoreLocks", false);
         b.pop();
 
         b.push("minigames");
@@ -96,6 +106,38 @@ public final class LobbyConfig {
         } catch (NumberFormatException e) {
             return null;
         }
+    }
+
+    public record Area(String name, double minLat, double minLon, double maxLat, double maxLon) {
+        public boolean contains(double lat, double lon) {
+            return lat >= minLat && lat <= maxLat && lon >= minLon && lon <= maxLon;
+        }
+    }
+
+    public static List<Area> lockedAreas() {
+        List<Area> out = new ArrayList<>();
+        for (String entry : LOCKED_AREAS.get()) {
+            Area area = parseArea(entry);
+            if (area != null) out.add(area);
+        }
+        return out;
+    }
+
+    static Area parseArea(String entry) {
+        String[] p = entry.split(";");
+        if (p.length != 5 || p[0].isBlank()) return null;
+        try {
+            double a = Double.parseDouble(p[1].trim()), b = Double.parseDouble(p[2].trim());
+            double c = Double.parseDouble(p[3].trim()), d = Double.parseDouble(p[4].trim());
+            if (Math.abs(a) > 90 || Math.abs(c) > 90 || Math.abs(b) > 180 || Math.abs(d) > 180) return null;
+            return new Area(p[0].trim(), Math.min(a, c), Math.min(b, d), Math.max(a, c), Math.max(b, d));
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    private static boolean validArea(Object o) {
+        return o instanceof String s && parseArea(s) != null;
     }
 
     private static boolean validPlace(Object o) {

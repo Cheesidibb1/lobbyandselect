@@ -8,6 +8,8 @@ NeoForge 1.21.1 server mod. Every player who connects lands in a lobby dimension
 - **Earth Platform integration** - travel uses `/earth goto <lat> <lon> <player>` so terrain is loaded and the landing is safe. Main world defaults to `earthplatform:cubic`. Without Earth Platform it falls back to the same Mercator math on the overworld.
 - **Minigames while waiting** - parkour (timed, checkpoints, `/lobby parkour top`), spleef (stand on the lapis pad), and geography trivia in chat.
 
+- **Locked areas** - spots in `spawn.lockedAreas` (`Name;minLat;minLon;maxLat;maxLon`) can't be picked; the map shows them in red and the server refuses them too. With Open Parties and Claims installed (`respectOpenPacClaims`), spots inside another player's or party's claim are locked as well. Ops can optionally bypass (`opsIgnoreLocks`).
+
 ## Commands
 `/lobby` help, `status`, `spawn [lat lon]`, `parkour [top]`, `spleef`, `leave`, `stats`
 Admin: `/lobby admin resetspawn|admit|send|max|bypass|rebuild|trivia`

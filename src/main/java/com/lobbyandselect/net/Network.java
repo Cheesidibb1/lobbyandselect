@@ -32,6 +32,6 @@ public final class Network {
     }
 
     public static void openMap(ServerPlayer player) {
-        PacketDistributor.sendToPlayer(player, OpenSpawnMapPayload.fromConfig());
+        PacketDistributor.sendToPlayer(player, OpenSpawnMapPayload.fromConfig(player));
     }
 }

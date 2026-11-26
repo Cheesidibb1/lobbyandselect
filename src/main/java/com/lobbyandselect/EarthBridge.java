@@ -60,12 +60,20 @@ public final class EarthBridge {
         fallbackTravel(player, latitude, longitude);
     }
 
+    public static int blockX(double longitude, double metresPerBlock) {
+        return (int) Math.floor(Math.toRadians(longitude) * RADIUS / metresPerBlock);
+    }
+
+    public static int blockZ(double latitude, double metresPerBlock) {
+        double lat = Math.max(-85.0, Math.min(85.0, latitude));
+        return (int) Math.floor(-Math.log(Math.tan(Math.PI / 4 + Math.toRadians(lat) / 2)) * RADIUS / metresPerBlock);
+    }
+
     private static void fallbackTravel(ServerPlayer player, double latitude, double longitude) {
         ServerLevel level = mainLevel(player.server);
         double metres = LobbyConfig.METRES_PER_BLOCK.get();
         double lat = Math.max(-85.0, Math.min(85.0, latitude));
-        int x = (int) Math.floor(Math.toRadians(longitude) * RADIUS / metres);
-        int z = (int) Math.floor(-Math.log(Math.tan(Math.PI / 4 + Math.toRadians(lat) / 2)) * RADIUS / metres);
+        int x = blockX(longitude, metres), z = blockZ(lat, metres);
         level.getChunk(x >> 4, z >> 4); // generate it so the heightmap is real
         int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
         if (y <= level.getMinBuildHeight()) y = level.getSeaLevel() + 1;

@@ -336,6 +336,12 @@ public final class LobbyManager {
             return String.format(Locale.ROOT, "That spot is off the map. Latitude must be within ±%.0f and longitude within ±180.", max);
         }
 
+        String locked = LockedAreas.reason(player, latitude, longitude);
+        if (locked != null) {
+            if (Network.canOpenMap(player)) Network.openMap(player);
+            return locked;
+        }
+
         record.spawnChosen = true;
         record.spawnLatitude = latitude;
         record.spawnLongitude = longitude;

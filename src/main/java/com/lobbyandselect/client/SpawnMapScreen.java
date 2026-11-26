@@ -39,6 +39,7 @@ public final class SpawnMapScreen extends Screen {
     @Nullable private Double pickLat, pickLon;
     @Nullable private String pickName;
     private Button confirm;
+    @Nullable private String lockedNote;
 
     public SpawnMapScreen(OpenSpawnMapPayload data) {
         super(Component.literal("Choose your spawn point"));
@@ -138,6 +139,15 @@ public final class SpawnMapScreen extends Screen {
             g.fill(mapLeft(), y, mapRight(), y + 1, lat == 0 ? 0x66FFFFFF : 0x33FFFFFF);
         }
 
+        // Locked areas: red, and they can't be picked.
+        for (OpenSpawnMapPayload.AreaEntry area : data.locked()) {
+            int x0 = (int) screenX(EarthMapTexture.u(area.minLon())), x1 = (int) screenX(EarthMapTexture.u(area.maxLon()));
+            int y0 = (int) screenY(EarthMapTexture.v(area.maxLat())), y1 = (int) screenY(EarthMapTexture.v(area.minLat()));
+            g.fill(x0, y0, x1, y1, 0x66E03030);
+            g.renderOutline(x0, y0, Math.max(1, x1 - x0), Math.max(1, y1 - y0), 0xFFE03030);
+            if (x1 - x0 > font.width(area.name()) + 4) g.drawString(font, "🔒 " + area.name(), x0 + 3, y0 + 3, 0xFFFFFFFF, true);
+        }
+
         // Places.
         OpenSpawnMapPayload.PlaceEntry hovered = placeAt(mouseX, mouseY);
         for (OpenSpawnMapPayload.PlaceEntry place : data.places()) {
@@ -174,9 +184,10 @@ public final class SpawnMapScreen extends Screen {
         if (pickLat != null && pickLon != null) {
             info = (pickName != null ? pickName + "  " : "") + coordinates(pickLat, pickLon);
         } else {
-            info = "Click the map to choose a spot";
+            info = lockedNote != null ? lockedNote : "Click the map to choose a spot";
         }
-        g.drawCenteredString(font, info, width / 2, height - BOTTOM + 8, pickLat != null ? 0xFF55FF55 : 0xFFAAAAAA);
+        g.drawCenteredString(font, info, width / 2, height - BOTTOM + 8,
+                pickLat != null ? 0xFF55FF55 : lockedNote != null ? 0xFFFF5555 : 0xFFAAAAAA);
 
         if (overMap(mouseX, mouseY)) {
             double lat = EarthMapTexture.latitude(toV(mouseY)), lon = EarthMapTexture.longitude(toU(mouseX));
@@ -266,6 +277,16 @@ public final class SpawnMapScreen extends Screen {
             lat = EarthMapTexture.latitude(toV(mouseY));
             lon = EarthMapTexture.longitude(toU(mouseX));
         }
+        for (OpenSpawnMapPayload.AreaEntry area : data.locked()) {
+            if (area.contains(lat, lon)) {
+                pickLat = pickLon = null;
+                pickName = null;
+                lockedNote = area.name() + " is locked - request access first";
+                updateConfirm();
+                return;
+            }
+        }
+        lockedNote = null;
         if (Math.abs(lat) > data.maxLatitude()) {
             pickLat = pickLon = null;
             pickName = null;
