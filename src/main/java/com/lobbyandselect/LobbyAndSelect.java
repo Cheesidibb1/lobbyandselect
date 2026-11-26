@@ -23,6 +23,7 @@ public final class LobbyAndSelect {
         container.registerConfig(ModConfig.Type.SERVER, LobbyConfig.SPEC);
         modBus.addListener(Network::register);
         LobbyManager.register(NeoForge.EVENT_BUS);
+        Territory.register(NeoForge.EVENT_BUS);
         NeoForge.EVENT_BUS.addListener(LobbyCommands::register);
     }
 }

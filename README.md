@@ -9,6 +9,7 @@ NeoForge 1.21.1 server mod. Every player who connects lands in a lobby dimension
 - **Minigames while waiting** - parkour (timed, checkpoints, `/lobby parkour top`), spleef (stand on the lapis pad), and geography trivia in chat.
 
 - **Locked areas** - spots in `spawn.lockedAreas` (`Name;minLat;minLon;maxLat;maxLon`) can't be picked; the map shows them in red and the server refuses them too. With Open Parties and Claims installed (`respectOpenPacClaims`), spots inside another player's or party's claim are locked as well. Ops can optionally bypass (`opsIgnoreLocks`).
+- **Territory** (needs Open Parties and Claims) - `/lobby territory expand` claims the chunk you stand in if it borders your land; `/lobby territory conquer` starts a capture of an enemy chunk bordering yours (hold it `captureSeconds` with no defender in it). Claims are real OPAC claims, so OPAC's limits and parties apply and they show on Xaero's maps. Locked areas can't be expanded into or conquered.
 
 ## Commands
 `/lobby` help, `status`, `spawn [lat lon]`, `parkour [top]`, `spleef`, `leave`, `stats`

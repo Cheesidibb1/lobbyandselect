@@ -60,6 +60,13 @@ public final class LobbyCommands {
             if (LobbyWorld.isLobby(player.level())) LobbyManager.teleportToLobbySpawn(player);
             return 1;
         }));
+        root.then(Commands.literal("territory")
+                .then(Commands.literal("expand").executes(context -> territory(context, true)))
+                .then(Commands.literal("conquer").executes(context -> territory(context, false)))
+                .then(Commands.literal("cancel").executes(context -> {
+                    Territory.cancel(context.getSource().getPlayerOrException().getUUID());
+                    return 1;
+                })));
         root.then(Commands.literal("stats").executes(LobbyCommands::stats));
 
         var admin = Commands.literal("admin").requires(source -> source.hasPermission(2));
@@ -181,6 +188,13 @@ public final class LobbyCommands {
             return 1;
         }
         return LobbyManager.chooseSpawn(player, lat, lon) == null ? 1 : 0;
+    }
+
+    private static int territory(CommandContext<CommandSourceStack> context, boolean expand) throws CommandSyntaxException {
+        ServerPlayer player = context.getSource().getPlayerOrException();
+        String err = expand ? Territory.expand(player) : Territory.startConquest(player);
+        if (err != null) context.getSource().sendFailure(Component.literal(err));
+        return err == null ? 1 : 0;
     }
 
     private static int parkourTop(CommandContext<CommandSourceStack> context) {

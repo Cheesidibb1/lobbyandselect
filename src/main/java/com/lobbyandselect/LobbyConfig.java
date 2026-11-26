@@ -24,6 +24,10 @@ public final class LobbyConfig {
     public static final ModConfigSpec.BooleanValue RESPECT_OPENPAC_CLAIMS;
     public static final ModConfigSpec.BooleanValue OPS_IGNORE_LOCKS;
 
+    public static final ModConfigSpec.BooleanValue TERRITORY_ENABLED;
+    public static final ModConfigSpec.BooleanValue TERRITORY_REQUIRE_ADJACENT;
+    public static final ModConfigSpec.IntValue CAPTURE_SECONDS;
+
     public static final ModConfigSpec.IntValue SPLEEF_MIN_PLAYERS;
     public static final ModConfigSpec.BooleanValue TRIVIA_ENABLED;
     public static final ModConfigSpec.IntValue TRIVIA_INTERVAL_SECONDS;
@@ -66,6 +70,15 @@ public final class LobbyConfig {
                 .define("respectOpenPacClaims", true);
         OPS_IGNORE_LOCKS = b.comment("Operators (permission level 2+) may pick locked spawns.")
                 .define("opsIgnoreLocks", false);
+        b.pop();
+
+        b.push("territory");
+        TERRITORY_ENABLED = b.comment("Let players expand and conquer land with /lobby territory (needs Open Parties and Claims).")
+                .define("enabled", true);
+        TERRITORY_REQUIRE_ADJACENT = b.comment("Expansion and conquest must border land the player (or their party) already owns.")
+                .define("requireAdjacent", true);
+        CAPTURE_SECONDS = b.comment("Seconds a conqueror must hold an enemy chunk with no defender in it.")
+                .defineInRange("captureSeconds", 30, 5, 3600);
         b.pop();
 
         b.push("minigames");

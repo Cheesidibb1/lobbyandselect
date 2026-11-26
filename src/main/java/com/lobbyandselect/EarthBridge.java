@@ -69,6 +69,13 @@ public final class EarthBridge {
         return (int) Math.floor(-Math.log(Math.tan(Math.PI / 4 + Math.toRadians(lat) / 2)) * RADIUS / metresPerBlock);
     }
 
+    /** Inverse of {@link #blockX}/{@link #blockZ}: [latitude, longitude] of a block position. */
+    public static double[] toLatLon(double x, double z, double metresPerBlock) {
+        double lon = Math.toDegrees(x * metresPerBlock / RADIUS);
+        double lat = Math.toDegrees(2 * Math.atan(Math.exp(-z * metresPerBlock / RADIUS)) - Math.PI / 2);
+        return new double[] {lat, lon};
+    }
+
     private static void fallbackTravel(ServerPlayer player, double latitude, double longitude) {
         ServerLevel level = mainLevel(player.server);
         double metres = LobbyConfig.METRES_PER_BLOCK.get();
